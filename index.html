@@ -487,7 +487,8 @@ h1.hero-title .dot {
 @media (max-width: 980px) {
   .hero { padding-top: 16px; min-height: 0; }
   h1.hero-title { font-size: clamp(60px, 14vw, 130px); max-width: 100%; }
-  .hero-bottom { grid-template-columns: 1fr; gap: 24px; }
+  .hero-bottom { grid-template-columns: 1fr; gap: 24px; flex-direction: column !important; text-align: center; }
+  .hero-bottom h2 { text-align: center; }
 }
 
 /* ===================== SHOWREEL ===================== */
@@ -1741,7 +1742,7 @@ footer.foot {
     <a href="#process" class="kinetic-word" aria-label="Fuego iA" style="text-decoration: none; cursor: pointer;">
       <span>F</span><span>U</span><span>E</span><span>G</span><span>O</span><span class="sp">&nbsp;</span><span>i</span><span>A</span>
     </a>
-    <p class="kinetic-sub" data-i="kin.sub">CAMPAÑAS PUBLICITARIAS Y CONTENIDOS POTENCIADOS POR AI</p>
+    <p class="kinetic-sub" data-i="kin.sub">CAMPAÑAS PUBLICITARIAS Y CONTENIDOS POTENCIADOS POR IA</p>
   </div>
 </section>
 
@@ -2159,9 +2160,9 @@ footer.foot {
       en: '<span class="row">Humans and <em>machines</em></span>\
            <span class="row">working <em>together.</em></span>'
     },
-    '[data-i="kin.sub"]':        { en: 'Humans powered by AI' },
+    '[data-i="kin.sub"]':        { en: 'ADVERTISING CAMPAIGNS AND CONTENT POWERED BY AI' },
     '[data-i="hero.l1.label"]':  { en: '(Company)' },
-    '[data-i="hero.l1.text"]':   { en: 'Regional creativity + content production. We turn ideas into campaigns that connect brands with people.' },
+    '[data-i="hero.l1.text"]':   { en: 'CREATE YOUR CAMPAIGN WITH YOUR AD SPOT<br>FROM START TO FINISH IN 30 DAYS' },
     '[data-i="hero.l2.label"]':  { en: '(Based in)' },
     '[data-i="hero.l2.text"]':   { en: 'Bolivia · Argentina · USA' },
     '[data-i="hero.cta"]':       { en: 'Start a project' },
