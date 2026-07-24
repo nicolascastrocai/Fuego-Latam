@@ -1759,9 +1759,7 @@ footer.foot {
 <!-- ===================== SHOWREEL ===================== -->
 <section class="showreel-wrap">
   <div class="showreel">
-    <video id="reel-video" class="reel-video" loop playsinline autoplay muted>
-      <source src="assets/Construred_16-9_34_segundos.mp4" type="video/mp4">
-    </video>
+    <iframe id="yt-player" src="https://www.youtube.com/embed/PtqEQxayKxI?autoplay=1&mute=1&loop=1&playlist=PtqEQxayKxI&controls=0&rel=0&playsinline=1&enablejsapi=1" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%;border:none;"></iframe>
     <div class="reel-clickarea" id="reel-clickarea"></div>
     <div class="reel-controls">
       <button class="reel-btn" id="reel-mute-btn" aria-label="Activar sonido">
@@ -1775,6 +1773,14 @@ footer.foot {
         <svg viewBox="0 0 24 24" fill="currentColor" id="play-icon">
           <rect x="6" y="4" width="4" height="16"/>
           <rect x="14" y="4" width="4" height="16"/>
+        </svg>
+      </button>
+      <button class="reel-btn" id="reel-fullscreen-btn" aria-label="Pantalla completa">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 3 21 3 21 9"/>
+          <polyline points="9 21 3 21 3 15"/>
+          <line x1="21" y1="3" x2="14" y2="10"/>
+          <line x1="3" y1="21" x2="10" y2="14"/>
         </svg>
       </button>
     </div>
@@ -2338,68 +2344,130 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
 </script>
 
 <script>
-  (function() {
-    var video = document.getElementById('reel-video');
+  // YouTube Player API
+  var tag = document.createElement('script');
+  tag.src = "https://www.youtube.com/iframe_api";
+  var firstScriptTag = document.getElementsByTagName('script')[0];
+  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+  var ytPlayer;
+  var isMuted = true;
+  var isPlaying = true;
+  var userPaused = false;
+  var firstClick = true;
+
+  function onYouTubeIframeAPIReady() {
+    ytPlayer = new YT.Player('yt-player', {
+      events: {
+        'onReady': onPlayerReady,
+        'onStateChange': onPlayerStateChange
+      }
+    });
+  }
+
+  function onPlayerReady(event) {
+    event.target.mute();
+    event.target.playVideo();
+    setupControls();
+    setupScrollObserver();
+  }
+
+  function onPlayerStateChange(event) {
+    var playIcon = document.getElementById('play-icon');
+    if (event.data == YT.PlayerState.PLAYING) {
+      isPlaying = true;
+      playIcon.innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+    } else if (event.data == YT.PlayerState.PAUSED) {
+      isPlaying = false;
+      playIcon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>';
+    }
+  }
+
+  function updateMuteIcon() {
+    var muteBtn = document.getElementById('reel-mute-btn');
+    muteBtn.querySelector('svg').innerHTML = isMuted
+      ? '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>'
+      : '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" class="sound-wave"/>';
+  }
+
+  function setupControls() {
     var muteBtn = document.getElementById('reel-mute-btn');
     var clickArea = document.getElementById('reel-clickarea');
     var playBtn = document.getElementById('reel-play-btn');
-    var playIcon = document.getElementById('play-icon');
-    var userPaused = false;
-    var firstClick = true;
 
-    // Update mute icon
-    function updateMuteIcon() {
-      muteBtn.querySelector('svg').innerHTML = video.muted
-        ? '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>'
-        : '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" class="sound-wave"/>';
-    }
-
-    // Mute/Unmute
     muteBtn.addEventListener('click', function(e) {
       e.stopPropagation();
-      video.muted = !video.muted;
+      if (isMuted) {
+        ytPlayer.unMute();
+        isMuted = false;
+      } else {
+        ytPlayer.mute();
+        isMuted = true;
+      }
       updateMuteIcon();
     });
 
-    // Play/Pause on click anywhere
     function togglePlay() {
-      // First click: enable sound
       if (firstClick) {
-        video.muted = false;
+        ytPlayer.unMute();
+        isMuted = false;
         updateMuteIcon();
         firstClick = false;
       }
-      if (video.paused) {
-        video.play();
-        userPaused = false;
-      } else {
-        video.pause();
+      if (isPlaying) {
+        ytPlayer.pauseVideo();
         userPaused = true;
+      } else {
+        ytPlayer.playVideo();
+        userPaused = false;
       }
     }
+
     clickArea.addEventListener('click', togglePlay);
     playBtn.addEventListener('click', function(e) { e.stopPropagation(); togglePlay(); });
 
-    // Update play icon
-    video.addEventListener('play', function() {
-      playIcon.innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+    var fullscreenBtn = document.getElementById('reel-fullscreen-btn');
+    fullscreenBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var showreel = document.querySelector('.showreel');
+      var isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+      
+      if (isFullscreen) {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+          document.msExitFullscreen();
+        }
+      } else {
+        if (showreel.requestFullscreen) {
+          showreel.requestFullscreen();
+        } else if (showreel.webkitRequestFullscreen) {
+          showreel.webkitRequestFullscreen();
+        } else if (showreel.msRequestFullscreen) {
+          showreel.msRequestFullscreen();
+        }
+      }
     });
-    video.addEventListener('pause', function() {
-      playIcon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>';
-    });
+  }
 
-    // Auto play/pause on scroll
+  function setupScrollObserver() {
+    var showreel = document.querySelector('.showreel');
     var observer = new IntersectionObserver(function(entries) {
       entries.forEach(function(entry) {
-        if (entry.isIntersecting && !userPaused) {
-          video.play();
-        } else if (!entry.isIntersecting) {
-          video.pause();
+        if (ytPlayer && ytPlayer.playVideo) {
+          if (entry.isIntersecting && !userPaused) {
+            ytPlayer.playVideo();
+          } else if (!entry.isIntersecting) {
+            ytPlayer.pauseVideo();
+          }
         }
       });
     }, { threshold: 0.3 });
-    observer.observe(video);
-  })();
+    observer.observe(showreel);
+  }
 </script>
+
 </body>
 </html>
